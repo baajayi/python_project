@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Life Expectancy Visualization</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+<script>
+// Path to your JSON file
+const jsonFilePath = 'gexp.json';
+
+// Load the JSON data
+d3.json(jsonFilePath).then(function(data) {
+    // Now you have your data and can use it to create the visualization
+    
+    // Set the dimensions and margins of the graph
+    const margin = {top: 10, right: 30, bottom: 30, left: 60},
+          width = 960 - margin.left - margin.right,
+          height = 500 - margin.top - margin.bottom;
+
+    // Append the svg object to the body of the page
+    const svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Add X axis
+    const x = d3.scaleLinear()
+        .domain(d3.extent(data, d => d.year))
+        .range([0, width]);
+    svg.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).tickFormat(d3.format("d"))); // Format as integer
+
+    // Add Y axis
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.life_expectancy)])
+        .range([height, 0]);
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    // Add the line
+    svg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 1.5)
+        .attr("d", d3.line()
+          .x(d => x(d.year))
+          .y(d => y(d.life_expectancy))
+        );
+}).catch(function(error) {
+    // Handle errors if any
+    console.log(error);
+});
+</script>
+</body>
+</html>
